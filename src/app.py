@@ -20,7 +20,7 @@ def get_db():
         g.db.row_factory = sqlite3.Row
     return g.db
 
-# function route for initializimg the tables based on the sql create statement stored in schema.sql
+# function route for initializing the tables based on the sql create statement stored in schema.sql
 def init_db():
     with app.app_context():
         db = get_db()
@@ -40,31 +40,50 @@ def init_db_command():
 #at the end of a request, close the opened db connection explicitly 
 @app.teardown_appcontext
 def close_db(e=None):
-    db = app.extensions.pop('db', None)
+    db = g.pop('db', None)
     if db is not None:
         db.close()
 
 #create route for REST "notes endpoint", add methods for both get and post 
 @app.route('/notes', methods = ['GET', 'POST'])
 def notes():
-    if request.method == 'POST':
-        # throw error if missing input parameters
-        if 'content' not in request.form:
-            return jsonify(error="Missing required parameter(s).")
-        content = request.form['content']
-        db = get_db()
-        db.execute(
-            'INSERT INTO notes (content) VALUES (?)',
-            (content,)
-        )
-        db.commit()
-    elif request.method == 'GET':
-        db = get_db()
-        notes = db.execute(
-            'SELECT * FROM notes'
-        )
-        return jsonify(notes.fetchall())
-        
+    try:
+        if request.method == 'POST':
+            # throw error if missing input parameters
+            if 'content' not in request.form:
+                return jsonify(
+                    success=False,
+                    error="Missing required parameter.")
+            content = request.form['content']
+            db = get_db()
+            db.execute(
+                'INSERT INTO notes (content) VALUES (?)',
+                (content,)
+            )
+            db.commit()
+            return jsonify({
+                "success": True,
+                "message": "Note added succesfully!"
+            }), 201
+        elif request.method == 'GET':
+            db = get_db()
+            notes = db.execute(
+                'SELECT * FROM notes'
+            ).fetchall()
+            return jsonify({
+                "success": True,
+                "message": "Notes grabbed succesfully!",
+                "notes": [dict(note) for note in notes]
+            })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "details": str(e) if app.debug else None
+        }), 500
+            
+
+
 
 with app.app_context():
     init_db()
