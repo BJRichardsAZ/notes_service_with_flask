@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify, request
 import sqlite3 
 import os 
 
@@ -43,4 +43,33 @@ def close_db(e=None):
     db = app.extensions.pop('db', None)
     if db is not None:
         db.close()
+
+#create route for REST "notes endpoint", add methods for both get and post 
+@app.route('/notes', methods = ['GET', 'POST'])
+def notes():
+    if request.method == 'POST':
+        # throw error if missing input parameters
+        if 'title' not in request.form or 'content' not in request.form:
+            return jsonify(error="Missing required parameter(s).")
+        title = request.form['title']
+        content = request.form['content']
+        db = get_db()
+        db.execute(
+            'INSERT INTO notes (title, content) VALUES (?, ?)',
+            (title, content)
+        )
+        db.commit()
+    elif request.method == 'GET':
+        db = get_db()
+        notes = db.execute(
+            'SELECT * FROM notes'
+        )
+        return jsonify(notes.fetchall())
+        
+
+with app.app_context():
+    init_db()
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
