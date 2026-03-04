@@ -53,7 +53,7 @@ def notes():
             if 'content' not in request.form:
                 return jsonify(
                     success=False,
-                    error="Missing required parameter.")
+                    error="Missing required parameter: content"), 400
             content = request.form['content']
             db = get_db()
             db.execute(
