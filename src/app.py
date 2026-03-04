@@ -69,7 +69,7 @@ def notes():
             return jsonify({
                 "success": True,
                 "message": "Note added succesfully!"
-            }), 201
+            }), 200
         elif request.method == 'GET':
             db = get_db()
             notes = db.execute(
@@ -82,9 +82,8 @@ def notes():
             })
    
    #create route for REST endpoint for operating on specific nods, add methods for both get and post, and update
-@app.route('/notes/{id}', methods = ['GET', 'DELETE'])
+@app.route('/notes/<id>', methods = ['GET', 'DELETE'])
 def note(id):
- 
         if request.method == 'GET':
             db = get_db()
             note = db.execute(
@@ -97,7 +96,7 @@ def note(id):
                 "success": True,
                 "message": "Note grabbed succesfully!",
                 "note": dict(note)
-            }), 201 
+            }), 200 
         if request.method == 'DELETE':
             db = get_db()
             cursor = db.execute(
