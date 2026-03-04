@@ -11,14 +11,14 @@ app.config['DATABASE'] = os.path.join(app.root_path, 'notes.db')
 #create a fresh lazy connection instance for each http request using per-request bag
 #provided by flask 
 def get_db():
-    if 'db' not in app.extensions:
-        app.extensions['db'] = sqlite3.connect(
+    if 'db' not in g:
+        g.db = sqlite3.connect(
             app.config['DATABASE'],
             #detect data types
             detect_types=sqlite3.PARSE_DECLTYPES
         )
-        app.extensions['db'].row_factory = sqlite3.Row
-    return app.extensions['db']
+        g.db.row_factory = sqlite3.Row
+    return g.db
 
 # function route for initializimg the tables based on the sql create statement stored in schema.sql
 def init_db():
@@ -55,7 +55,7 @@ def notes():
         db = get_db()
         db.execute(
             'INSERT INTO notes (content) VALUES (?)',
-            (content)
+            (content,)
         )
         db.commit()
     elif request.method == 'GET':
