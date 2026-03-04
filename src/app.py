@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, g 
 import sqlite3 
 import os 
-from .errors import register_error_handlers
+from errors import register_error_handlers
 
 def create_app():
     app = Flask(__name__)
@@ -9,7 +9,9 @@ def create_app():
     #create a reference to the db in config for ease
     app.config['DATABASE'] = os.path.join(app.root_path, 'notes.db')
     register_error_handlers(app)
+
     return app
+
 
 app = create_app()
 
@@ -77,6 +79,39 @@ def notes():
                 "success": True,
                 "message": "Notes grabbed succesfully!",
                 "notes": [dict(note) for note in notes]
+            })
+   
+   #create route for REST endpoint for operating on specific nods, add methods for both get and post, and update
+@app.route('/notes/{id}', methods = ['GET', 'DELETE'])
+def note(id):
+ 
+        if request.method == 'GET':
+            db = get_db()
+            note = db.execute(
+                'SELECT * FROM notes WHERE id = ?',
+                (id,)
+            ).fetchone()
+            if note is None:
+                return NoteNotFound()
+            else: return jsonify({
+                "success": True,
+                "message": "Note grabbed succesfully!",
+                "note": dict(note)
+            }), 201 
+        if request.method == 'DELETE':
+            db = get_db()
+            cursor = db.execute(
+                'DELETE FROM notes WHERE id = ?',
+                (id,)
+            )
+            db.commit()
+
+            if cursor.rowcount == 0:
+               raise NoteNotFound()
+
+            return jsonify({
+                "success": True,
+                "message": "Note deleted succesfully!"
             })
    
 
