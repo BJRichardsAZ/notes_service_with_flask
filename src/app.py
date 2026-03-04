@@ -1,12 +1,18 @@
 from flask import Flask, jsonify, request, g 
 import sqlite3 
 import os 
+from .errors import register_error_handlers
 
+def create_app():
+    app = Flask(__name__)
 
-app = Flask(__name__)
+    #create a reference to the db in config for ease
+    app.config['DATABASE'] = os.path.join(app.root_path, 'notes.db')
+    register_error_handlers(app)
+    return app
 
-#create a reference to the db in config for ease
-app.config['DATABASE'] = os.path.join(app.root_path, 'notes.db')
+app = create_app()
+
 
 #create a fresh lazy connection instance for each http request using per-request bag
 #provided by flask 
@@ -20,7 +26,7 @@ def get_db():
         g.db.row_factory = sqlite3.Row
     return g.db
 
-# function route for initializing the tables based on the sql create statement stored in schema.sql
+# function for initializing the tables based on the sql create statement stored in schema.sql
 def init_db():
     with app.app_context():
         db = get_db()
@@ -47,13 +53,10 @@ def close_db(e=None):
 #create route for REST "notes endpoint", add methods for both get and post 
 @app.route('/notes', methods = ['GET', 'POST'])
 def notes():
-    try:
         if request.method == 'POST':
             # throw error if missing input parameters
             if 'content' not in request.form:
-                return jsonify(
-                    success=False,
-                    error="Missing required parameter: content"), 400
+                raise MissingParameter()
             content = request.form['content']
             db = get_db()
             db.execute(
@@ -75,15 +78,7 @@ def notes():
                 "message": "Notes grabbed succesfully!",
                 "notes": [dict(note) for note in notes]
             })
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e),
-            "details": str(e) if app.debug else None
-        }), 500
-            
-
-
+   
 
 with app.app_context():
     init_db()
