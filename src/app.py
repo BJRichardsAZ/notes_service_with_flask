@@ -49,14 +49,13 @@ def close_db(e=None):
 def notes():
     if request.method == 'POST':
         # throw error if missing input parameters
-        if 'title' not in request.form or 'content' not in request.form:
+        if 'content' not in request.form:
             return jsonify(error="Missing required parameter(s).")
-        title = request.form['title']
         content = request.form['content']
         db = get_db()
         db.execute(
-            'INSERT INTO notes (title, content) VALUES (?, ?)',
-            (title, content)
+            'INSERT INTO notes (content) VALUES (?)',
+            (content)
         )
         db.commit()
     elif request.method == 'GET':
