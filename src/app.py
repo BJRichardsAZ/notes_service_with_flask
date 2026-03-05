@@ -37,7 +37,7 @@ def init_db():
         db.commit()
         print('Database initialized');
 
-# write a cli command for initializing the tables from schema file 
+# write a cli command for initializing (or recreating fresh) the tables from schema file 
 @app.cli.command('init_db')
 def init_db_command():
     """CLI Command to Initialize Tables"""
@@ -60,6 +60,10 @@ def notes():
             if 'content' not in request.form:
                 raise MissingParameter()
             content = request.form['content']
+            if content == '':
+                raise MissingParameter()
+            if len(content) > 250:
+                raise InvalidNoteLength()
             db = get_db()
             db.execute(
                 'INSERT INTO notes (content) VALUES (?)',
@@ -90,6 +94,7 @@ def note(id):
                 'SELECT * FROM notes WHERE id = ?',
                 (id,)
             ).fetchone()
+            #check for not existance
             if note is None:
                 return NoteNotFound()
             else: return jsonify({
@@ -104,7 +109,7 @@ def note(id):
                 (id,)
             )
             db.commit()
-
+            #check for not existance, if rowcount is zero, that means the cursor found no match
             if cursor.rowcount == 0:
                raise NoteNotFound()
 
