@@ -1,31 +1,31 @@
 import pytest
-import sqlite3
-from app import create_app, init_db
+from src.app import create_app
+from src.db import init_db
 
 #create database fixture utilizing system memory 
 @pytest.fixture
 def client():
     # get flask app instance, set storage to system memory 
-    app = create_app()
-    app.config['TESTING'] = True
-    app.config['DATABASE'] = ':memory:'
+    app = create_app({
+        'TESTING': True,
+        'DATABASE':':memory:'
+    })
     #create flask request environment 
     with app.app_context():
-        init_db(),
+        init_db()
     #used built in flask method to create a test "browser" instance for requests
     with app.test_client() as client:
     #run everything up to yield, tear it down when the test completes
         yield client
 
-    return client; 
 #create parameter variations for endpoint tests (cut down on function code)
 @pytest.mark.parametrize(
     "method, endpoint, data, expected_status, expected_success, expected_message",
     [
          #POST when content is not provided, should result in a 400
-        ("post", "/notes", None, 400, False, "Missing required parameter: content."),
+        ("post", "/notes", None, 400, False, 'Missing required parameter: content.'),
          #POST when content is  left empty; should result in 400 error
-        ("post", "/notes", {"content": ""}, 400, False, "Missing required parameter: content."),
+        ("post", "/notes", {"content": ""}, 400, False, 'Missing required parameter: content.'),
         #POST string entered for content is longer than 250 characters, should throw an error
         ("post", "/notes", {"content": "a"*251}, 422, False, "Content parameter was over the 250 character limit."),
         #POST when content parameter is provided, note should post succesfully 
