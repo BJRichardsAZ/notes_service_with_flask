@@ -1,6 +1,6 @@
 import pytest
 import sqlite3
-from app import create_app, get_db, init_db
+from app import create_app
 
 #create database fixture utilizing system memory 
 @pytest.fixture
@@ -14,7 +14,7 @@ def client():
     "method, endpoint, data, expected_status, expected_success, expected_message",
     [
          #POST when content is not provided, should result in a 400
-        ("post", "/notes", None, 400, False, "Missing required parameter: content.")
+        ("post", "/notes", None, 400, False, "Missing required parameter: content."),
          #POST when content is  left empty; should result in 400 error
         ("post", "/notes", {"content": ""}, 400, False, "Missing required parameter: content."),
         #POST string entered for content is longer than 250 characters, should throw an error
@@ -38,3 +38,4 @@ def test_notes_endpoint(client, method, endpoint, data, expected_status,expected
     assert response.status_code is expected_status
     assert json_data["success"] is expected_success
     assert expected_message in str(json_data["message"])
+
