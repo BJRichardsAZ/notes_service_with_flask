@@ -96,7 +96,7 @@ def note(id):
             ).fetchone()
             #check for not existance
             if note is None:
-                return NoteNotFound()
+                raise NoteNotFound()
             else: return jsonify({
                 "success": True,
                 "message": "Note grabbed succesfully!",
