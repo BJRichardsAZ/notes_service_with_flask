@@ -1,127 +1,38 @@
-from flask import Flask, jsonify, request, g 
-import sqlite3 
-import os 
-from errors import register_error_handlers
+from flask import Flask
+from src.db import close_db
+from src.blueprints.notes import bp
+from src.errors import register_error_handlers
+import os
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
 
     #create a reference to the db in config for ease
     app.config['DATABASE'] = os.path.join(app.root_path, 'notes.db')
+
+    if test_config is not None:
+        app.config.update(test_config)
+
     register_error_handlers(app)
+
+    app.register_blueprint(bp)
+
+    app.teardown_appcontext(close_db)
 
     return app
 
 
+# Create the global app instance for running directly
 app = create_app()
 
-
-#create a fresh lazy connection instance for each http request using per-request bag
-#provided by flask 
-def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(
-            app.config['DATABASE'],
-            #detect data types
-            detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        g.db.row_factory = sqlite3.Row
-    return g.db
-
-# function for initializing the tables based on the sql create statement stored in schema.sql
-def init_db():
-    with app.app_context():
-        db = get_db()
-        with app.open_resource('schema.sql', mode='r') as f:
-            db.executescript(f.read())
-        db.commit()
-        print('Database initialized');
-
 # write a cli command for initializing (or recreating fresh) the tables from schema file 
+from src.db import init_db
 @app.cli.command('init_db')
 def init_db_command():
     """CLI Command to Initialize Tables"""
-    init_db()
+    with app.app_context():   
+        init_db()
     print("Initialized the database")
-
-
-#at the end of a request, close the opened db connection explicitly 
-@app.teardown_appcontext
-def close_db(e=None):
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
-
-#create route for REST "notes endpoint", add methods for both get and post 
-@app.route('/notes', methods = ['GET', 'POST'])
-def notes():
-        if request.method == 'POST':
-            # throw error if missing input parameters
-            if 'content' not in request.form:
-                raise MissingParameter()
-            content = request.form['content']
-            if content == '':
-                raise MissingParameter()
-            if len(content) > 250:
-                raise InvalidNoteLength()
-            db = get_db()
-            db.execute(
-                'INSERT INTO notes (content) VALUES (?)',
-                (content,)
-            )
-            db.commit()
-            return jsonify({
-                "success": True,
-                "message": "Note added succesfully!"
-            }), 200
-        elif request.method == 'GET':
-            db = get_db()
-            notes = db.execute(
-                'SELECT * FROM notes'
-            ).fetchall()
-            return jsonify({
-                "success": True,
-                "message": "Notes grabbed succesfully!",
-                "notes": [dict(note) for note in notes]
-            })
-   
-   #create route for REST endpoint for operating on specific nods, add methods for both get and post, and update
-@app.route('/notes/<id>', methods = ['GET', 'DELETE'])
-def note(id):
-        if request.method == 'GET':
-            db = get_db()
-            note = db.execute(
-                'SELECT * FROM notes WHERE id = ?',
-                (id,)
-            ).fetchone()
-            #check for not existance
-            if note is None:
-                raise NoteNotFound()
-            else: return jsonify({
-                "success": True,
-                "message": "Note grabbed succesfully!",
-                "note": dict(note)
-            }), 200 
-        if request.method == 'DELETE':
-            db = get_db()
-            cursor = db.execute(
-                'DELETE FROM notes WHERE id = ?',
-                (id,)
-            )
-            db.commit()
-            #check for not existance, if rowcount is zero, that means the cursor found no match
-            if cursor.rowcount == 0:
-               raise NoteNotFound()
-
-            return jsonify({
-                "success": True,
-                "message": "Note deleted succesfully!"
-            })
-   
-
-with app.app_context():
-    init_db()
 
 if __name__ == '__main__':
     app.run(debug=True)
-
