@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from src.errors import MissingParameter, InvalidNoteLength, NoteNotFound
+from src.errors import MissingParameter, InvalidNoteLength, NoteNotFound, register_error_handlers
 from src.db import get_db, init_db
 
 bp = Blueprint('/notes', __name__)
@@ -9,34 +9,39 @@ bp = Blueprint('/notes', __name__)
 @bp.route('/notes', methods = ['GET', 'POST'])
 def notes():
         if request.method == 'POST':
-            # throw error if missing input parameters
-            if 'content' not in request.form:
+
+            # throw error if missing input parameters or content length is too long
+            content = request.values.get('content')
+            if content is None:
                 raise MissingParameter()
-            content = request.form['content']
             if content == '':
                 raise MissingParameter()
             if len(content) > 250:
                 raise InvalidNoteLength()
+            
+            #db operations
             db = get_db()
             db.execute(
                 'INSERT INTO notes (content) VALUES (?)',
                 (content,)
             )
             db.commit()
+            
+            #return success message
             return jsonify({
                 "success": True,
                 "message": "Note added succesfully!"
             }), 200
-        elif request.method == 'GET':
-            db = get_db()
-            notes = db.execute(
-                'SELECT * FROM notes'
-            ).fetchall()
-            return jsonify({
-                "success": True,
-                "message": "Notes grabbed succesfully!",
-                "notes": [dict(note) for note in notes]
-            })
+        
+        db = get_db()
+        notes = db.execute(
+            'SELECT * FROM notes'
+        ).fetchall()
+        return jsonify({
+            "success": True,
+            "message": "Notes grabbed succesfully!",
+            "notes": [dict(note) for note in notes]
+        }), 200
         
 #create route for REST endpoint for operating on specific nods, add methods for both get and post, and update
 @bp.route('/notes/<id>', methods = ['GET', 'DELETE'])
