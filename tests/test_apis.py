@@ -8,7 +8,7 @@ from src.db import init_db, get_db
 def client():
     app = create_app(test_config={
         'TESTING': True,
-        'DATABASE': ':memory:',
+        'DATABASE': 'file::memory:?cache=shared',
         'DEBUG': True
     })
    
@@ -17,8 +17,8 @@ def client():
         init_db()                   
         
         # Create the test client INSIDE the same context/connection
-        with app.test_client() as client:
-            yield client
+        with app.test_client() as c:
+            yield c
 
 
 # fixture for GET tests that need data in the DB — reuses same client
