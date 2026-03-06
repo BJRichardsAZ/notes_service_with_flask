@@ -7,21 +7,21 @@ class NoteNotFound(Exception):
     status_code = 404
 
     def __init__(self, message= 'Note with that id not found.'):
-        super().__init__()
+        super().__init__(message)
         self.message = message
 
 class MissingParameter(Exception):
     status_code = 400
 
     def __init__(self, message= 'Missing required parameter: content.'):
-        super().__init__()
+        super().__init__(message)
         self.message = message
 
 class InvalidNoteLength(Exception): 
     status_code = 422 
 
     def __init__(self, message= "Content parameter was over the 250 character limit."):
-        super().__init__()
+        super().__init__(message)
         self.message = message
 
 
