@@ -19,7 +19,7 @@ def client():
         # Create the test client INSIDE the same context/connection
         with app.test_client() as c:
             yield c
-            
+
     with app.app_context():
         close_db()
 
@@ -30,7 +30,7 @@ def client_with_notes(client):
     with client.application.app_context():
         db = get_db()
         db.execute("INSERT INTO notes (content) VALUES (?)", ("Need new shoes.",))
-        db.execute("INSERT INTO notes (content) VALUES (?)", ("Need old shoes?.",))
+        db.execute("INSERT INTO notes (content) VALUES (?)", ("Need old shoes.",))
         db.commit()
     return client
 
@@ -69,7 +69,7 @@ def test_notes_endpoint_post(client, endpoint, data, expected_status, expected_s
         #GET when db is not empty, should result in 200 and display list
         ("/notes", 200, True, "Notes grabbed succesfully!", [
             {"content": "Need new shoes.", "id": 1},
-            {"content": "Hello how are you?.", "id": 2}
+            {"content": "Need old shoes.", "id": 2}
         ]),
         #GET single note by id
         ("/notes/1", 200, True, "Note grabbed succesfully!", 
