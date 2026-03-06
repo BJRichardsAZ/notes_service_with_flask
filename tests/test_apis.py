@@ -44,7 +44,8 @@ def test_notes_endpoint(client, method, endpoint, data, expected_status,expected
         response = client.post(endpoint, data=data or {})
     json_data = response.get_json()
 
-    assert response.status_code is expected_status
-    assert json_data["success"] is expected_success
-    assert expected_message in str(json_data["message"])
+    assert response.status_code == expected_status
+    assert json_data["success"] == expected_success
+    actual_text = str(json_data.get("error") or json_data.get("message", ""))
+    assert expected_message in actual_text
 
