@@ -14,7 +14,6 @@ def get_db():
 
 # function for initializing the tables based on the sql create statement stored in schema.sql
 def init_db():
-    with current_app.app_context():
         db = get_db()
         with current_app.open_resource('schema.sql', mode='r') as f:
             db.executescript(f.read())
