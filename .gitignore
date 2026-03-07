@@ -1,0 +1,33 @@
+#python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+#virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+#testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+#database
+*.db
+notes.db
+data/
+
+#docker volumes
+notes-data/
+
+#IDE
+.vscode/
+.idea/
+
+#OS
+.DS_Store
+Thumbs.db
