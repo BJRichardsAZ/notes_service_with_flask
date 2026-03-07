@@ -111,7 +111,7 @@ docker compose exec app flask --app src.app init_db
 - Replace dev server with Gunicorn for production use
 
 # Project Structure
-
+```bash
 notes_service_with_flask/
 ├── src/
 │   ├── app.py
@@ -126,7 +126,7 @@ notes_service_with_flask/
 ├── requirements.txt
 ├── schema.sql
 └── README.md
-
+```
 # (extra) personal notes while creating the system: 
 -	Begin by learning how to implement an instance of an app in flask; for concurrent requests, it’s much more efficient to create a helper function that establishes a new “lazy” connection to the db. This function will additionally detect data types of columns and translate database rows from tuple into sqlite3.row objects.
 -	We also create a route function that initializes the db; the schema for the notes table is contained in a separate file and called when the db is initialized; if the table does not exist in the db file, it will be created.
