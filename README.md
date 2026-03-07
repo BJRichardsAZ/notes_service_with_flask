@@ -69,13 +69,13 @@ Error responses return appropriate HTTP status codes (400, 404, 422, 500) with:
 ## Requirements: 
 Docker and Docker Compose installed and running
 
-# 1. Clone the repository
+### 1. Clone the repository
 git clone https://github.com/BJRichardsAZ/notes_service_with_flask.git
 
-# 2. In the project directory, start the service
+### 2. In the project directory, start the service
 docker compose up --build -d app
 
-# 3. Test it
+### 3. Test it
 curl http://localhost:5000/notes
 
 ### Data Persistance
