@@ -2,11 +2,11 @@
 
 A simple back-end service for posting and retrieving notes in a persistant database; all containerized in Docker. 
 
-## Overview
+# Overview
 
 This project implements a small backend service that allows users to create, view, and delete notes. It was developed as a coding challenge to demonstrate clean REST API design, data persistence, automated testing, and easy distribution via Docker.
 
-## Tech Stack & Rationale
+# Tech Stack & Rationale
 
 - **Framework**: Flask – lightweight and excellent for quickly building REST APIs in Python.
 - **Database**: SQLite (using Python’s built-in `sqlite3` module) – serverless, file-based, zero-configuration persistence.
@@ -16,7 +16,7 @@ This project implements a small backend service that allows users to create, vie
 
 I chose this stack to showcase not just python but my ability to learn new frameworks while keeping the solution simple, maintainable, and easy to evaluate.
 
-## System Overview
+# System Overview
 
 The service provides a REST API for managing notes. Each note contains:
 - `id` – auto-incrementing integer primary key
@@ -29,7 +29,7 @@ Features include:
 - Multi-stage Docker build that runs all tests before producing the final image
 - Persistent data stored in a Docker volume (survives container restarts)
 
-## API Endpoints
+# API Endpoints
 
 | Method | Endpoint           | Description                  |
 |--------|--------------------|------------------------------|
@@ -81,17 +81,17 @@ curl http://localhost:5000/notes
 ### Data Persistance
 The SQLITE database is stored in a named Docker volume and data should persists across container restarts, rebuilds, and docker compose down
 
-## Persistance Demo 
-curl -X POST http://localhost:5000/notes -d "content=This note survives restarts!"
+# Persistance Demo 
+curl -X POST http://localhost:5000/notes -d "content=This note survives restarts!
 docker compose down
 docker compose up -d app
-curl http://localhost:5000/notes   # ← note is still present
+curl http://localhost:5000/notes   
 
 if you need to clear the database for some reason, you should be able to invoke our cli command for calling init_db which will drop the existing table:
 
 docker compose exec app flask --app src.app init_db
 
-### Improvements and Tradeoffs
+# Improvements and Tradeoffs
 
 ## Tradeoffs:
 
@@ -107,7 +107,7 @@ docker compose exec app flask --app src.app init_db
 - Return the new note ID in POST responses
 - Replace dev server with Gunicorn for production use
 
-### Project Structure
+# Project Structure
 
 notes_service_with_flask/
 ├── src/
@@ -124,7 +124,7 @@ notes_service_with_flask/
 ├── schema.sql
 └── README.md
 
-### (extra) personal notes while creating the system: 
+# (extra) personal notes while creating the system: 
 -	Begin by learning how to implement an instance of an app in flask; for concurrent requests, it’s much more efficient to create a helper function that establishes a new “lazy” connection to the db. This function will additionally detect data types of columns and translate database rows from tuple into sqlite3.row objects.
 -	We also create a route function that initializes the db; the schema for the notes table is contained in a separate file and called when the db is initialized; if the table does not exist in the db file, it will be created.
 -	Also create a cli command to initialize the db, so that we can reset table(s) if needed. 
