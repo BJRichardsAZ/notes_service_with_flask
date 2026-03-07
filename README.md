@@ -83,11 +83,14 @@ The SQLITE database is stored in a named Docker volume and data should persists 
 
 # Persistance Demo 
 curl -X POST http://localhost:5000/notes -d "content=This note survives restarts!
-docker compose down
-docker compose up -d app
-curl http://localhost:5000/notes   
 
-if you need to clear the database for some reason, you should be able to invoke our cli command for calling init_db which will drop the existing table:
+docker compose down
+
+docker compose up -d app
+
+curl http://localhost:5000/notes
+
+If you need to clear the database for some reason, you should be able to invoke our cli command for calling init_db which will drop the existing table:
 
 docker compose exec app flask --app src.app init_db
 
