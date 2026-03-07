@@ -64,7 +64,7 @@ Error responses return appropriate HTTP status codes (400, 404, 422, 500) with:
   "error": "error message"
 }
 
-### Quick Start (Docker)
+# Quick Start (Docker)
 
 ## Requirements: 
 Docker and Docker Compose installed and running
