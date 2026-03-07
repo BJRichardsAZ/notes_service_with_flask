@@ -7,7 +7,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN pytest -q --tb=no
+RUN echo "=== Running tests before building final image ===" && \
+    pytest -v --tb=no && \
+    echo "=== All tests passed! Building final image ==="
 
 FROM python:3.12-slim
 
@@ -24,5 +26,4 @@ RUN mkdir -p /app/data
 ENV DATABASE=/app/data/notes.db
 EXPOSE 5000
 
-
-CMD ["sh", "-c", "flask --app src.app init_db && python -m src.app --host=0.0.0.0 --port=5000 --no-reload"]
+CMD ["sh", "-c", "if [ ! -f /app/data/notes.db ]; then echo '=== No database found - initializing ===' && flask --app src.app init_db; else echo '=== Database already exists - skipping init ==='; fi && python -m src.app --host=0.0.0.0 --port=5000 --no-reload"]
