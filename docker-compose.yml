@@ -1,0 +1,27 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - notes-data:/app/data
+    environment:
+      DATABASE: /app/data/notes.db
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: pytest -v --tb=short
+    environment:
+      TESTING: "True"
+      DATABASE: ":memory:"
+    volumes:
+      - .:/app
+
+volumes:
+  notes-data:
